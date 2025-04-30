@@ -37,6 +37,8 @@ import Account from "./Components/Account";
 import OurPanels from "./Components/OurPanels";
 import Icecream from "./Components/Icecream";
 import BuyerInformation from "./Components/BuyerInformation";
+import ShopOwnerInformation from "./Components/ShopOwnerInformation";
+import IceCreamTransaction from "./Components/IceCreamTransaction";
  
 
 
@@ -105,6 +107,8 @@ const App = () => {
         <Stack.Screen name="OurPanels" component={OurPanels} options={{headerShown:false}} />
         <Stack.Screen name="Icecream" component={Icecream}  options={{headerShown:false}}/>
         <Stack.Screen name="BuyerInformation" component={BuyerInformation}  options={{headerShown:false}}/>
+        <Stack.Screen name="ShopOwnerInformation" component={ShopOwnerInformation}  options={{headerShown:false}}/>
+        <Stack.Screen name="IceCreamTransaction" component={IceCreamTransaction}  options={{headerShown:false}}/>
          
 
       </Stack.Navigator>

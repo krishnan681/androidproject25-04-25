@@ -106,16 +106,15 @@ const AddPeople = ({navigation}) => {
         setShowCancelModal(true);
         return true;
       };
-  
+
       const backHandler = BackHandler.addEventListener(
         'hardwareBackPress',
         onBackPress,
       );
-  
+
       return () => backHandler.remove(); // Properly cleanup
-    }, [])
+    }, []),
   );
-  
 
   // Check if the mobile number is registered
   const checkMobileNumber = async mobile => {
@@ -210,34 +209,37 @@ const AddPeople = ({navigation}) => {
     }
 
     const sendSMS = async () => {
-      const smsBody = encodeURIComponent(
+      if (!mymobileno || !/^\d{10,}$/.test(mymobileno)) {
+        Alert.alert('Invalid mobile number.');
+        return;
+      }
+
+      const hasBusiness = !!mybusinessname?.trim();
+
+      const message =
         `Dear ${
-          mybusinessname
+          hasBusiness
             ? `${myprefix} ${myperson}, M/s.${mybusinessname}`
             : `${myprefix} ${myperson}`
-        },  
-  Signpost PHONE BOOK is a portal for Mobile Number Finder & Dialer with Digital Marketing. Please kindly view and verify the correctness of details on your firm, at the earliest.
-  
-  URL :- www.signpostphonebook.in  
-  User name :- Your mobile number  
-  Password :- Signpost  
-  You are registered Under the Category: ${myproduct}  
-  
-  You can use the PHONE BOOK for your business promotion in any desired (Pincode) area or Entire Coimbatore.`,
-      );
+        },
+    Signpost PHONE BOOK is a portal for Mobile Number Finder & Dialer with Digital Marketing. Please kindly view and verify the correctness of details on your firm.
+    
+    URL :- www.signpostphonebook.in
+    User name :- Your mobile number
+    Password :- Signpost
+    You are registered Under the Category: ${myproduct?.toUpperCase()}` +
+        (hasBusiness
+          ? `
+    You can use the PHONE BOOK for your business promotion in any desired (Pincode) area or Entire Coimbatore.`
+          : '');
 
+      const smsBody = encodeURIComponent(message.trim());
       const smsLink = `sms:${mymobileno}?body=${smsBody}`;
 
       try {
-        const supported = await Linking.canOpenURL(smsLink);
-        console.log('SMS Supported:', supported);
-        if (supported) {
-          await Linking.openURL(smsLink);
-        } else {
-          Alert.alert('SMS is not supported on this device.');
-        }
+        await Linking.openURL(smsLink);
       } catch (error) {
-        console.log('Error opening SMS:', error);
+        console.log('Error:', error);
         Alert.alert('Failed to open SMS app.');
       }
     };
@@ -718,7 +720,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   button: {
-    backgroundColor: '#ff0000',
+    backgroundColor: '#D5006D',
     borderRadius: 5,
     paddingVertical: 15,
     alignItems: 'center',

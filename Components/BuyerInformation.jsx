@@ -4,14 +4,14 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  Button,
-  Alert,
   ActivityIndicator,
   TouchableOpacity,
   FlatList,
   Linking,
+  Dimensions,
 } from 'react-native';
 import {AuthContext} from './AuthContext';
+import * as Animatable from 'react-native-animatable';
 
 const BuyerInformation = () => {
   const {userData} = useContext(AuthContext);
@@ -22,6 +22,8 @@ const BuyerInformation = () => {
   const [message, setMessage] = useState('');
   const [companies, setCompanies] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [toast, setToast] = useState('');
+  const [emojiVisible, setEmojiVisible] = useState(false);
 
   const userId = userData?.id || '';
   const userName = userData?.businessname || userData?.person || 'Guest';
@@ -37,10 +39,10 @@ const BuyerInformation = () => {
           const sortedData = jsonResponse.sort((a, b) => b.id - a.id);
           setCompanies(sortedData);
         } else {
-          Alert.alert('Error', 'Unexpected response from server.');
+          showToast('Unexpected response from server');
         }
       } catch (error) {
-        Alert.alert('Error', 'Failed to load data: ' + error.message);
+        showToast('Failed to load data: ' + error.message);
       }
     };
     fetchData();
@@ -66,25 +68,29 @@ const BuyerInformation = () => {
     if (selectedItem && userData) {
       const newMessage = `Dear ${
         selectedItem.businessname || selectedItem.person
-      }, We refer to your Business Listing in Signpost PHONEBOOOK, Mobile App. We are intersted in your Products. Please send Details. Call me 
-Regards ${userData.businessname || userData.person}
-${userData.mobileno || userData.email}`;
+      }, We refer to your Business Listing in Signpost PHONEBOOK, Mobile App. We are interested in your Products. Please send Details. Call me 
+          Regards ${userData.businessname || userData.person}
+          ${userData.mobileno || userData.email}`;
       setMessage(newMessage);
     }
   }, [selectedItem]);
 
+  const showToast = text => {
+    setToast(text);
+    setTimeout(() => setToast(''), 3000);
+  };
+
   const handleAddBuyer = async () => {
     if (!buyerId || !buyerMobile) {
-      Alert.alert('Missing Info', 'Enter a valid Buyer ID first');
+      showToast('Enter a valid Buyer ID first');
       return;
     }
 
     if (buyerList.some(item => item.buyerId === buyerId)) {
-      Alert.alert('Duplicate', 'This Buyer ID is already added.');
+      showToast('This Buyer ID is already added in your session.');
       return;
     }
 
-    // POST immediately
     setLoading(true);
     try {
       const response = await fetch(
@@ -101,24 +107,26 @@ ${userData.mobileno || userData.email}`;
         },
       );
       const result = await response.json();
+
       if (!result.success) {
-        Alert.alert('Insert Failed', result.message);
+        if (result.message.includes('Duplicate')) {
+          showToast('This buyer has already been added.');
+        } else {
+          showToast(result.message);
+        }
         setLoading(false);
         return;
       }
-    } catch (error) {
-      Alert.alert('Error', 'Something went wrong: ' + error.message);
+
+      const updatedList = [...buyerList, {buyerId, buyerMobile}];
+      setBuyerList(updatedList);
+      setBuyerId('');
+      setBuyerMobile('');
       setLoading(false);
-      return;
+    } catch (error) {
+      showToast('Something went wrong: ' + error.message);
+      setLoading(false);
     }
-
-    // Add to list after successful POST
-    const updatedList = [...buyerList, {buyerId, buyerMobile}];
-    setBuyerList(updatedList);
-
-    setBuyerId('');
-    setBuyerMobile('');
-    setLoading(false);
   };
 
   const handleRemoveBuyer = idToRemove => {
@@ -128,35 +136,57 @@ ${userData.mobileno || userData.email}`;
 
   const handleSubmitAndSendSMS = () => {
     if (buyerList.length === 0) {
-      Alert.alert('Error', 'Please add at least one Buyer ID');
+      showToast('Please add at least one Buyer ID');
       return;
     }
 
-    const lastBuyer = buyerList[buyerList.length - 1];
-    const smsUrl = `sms:${lastBuyer.buyerMobile}?body=${encodeURIComponent(
-      message,
-    )}`;
+    const mobileNumbers = buyerList
+      .map(b => b.buyerMobile)
+      .filter(Boolean)
+      .join(',');
 
-    Linking.openURL(smsUrl).catch(error => {
-      Alert.alert('Error', 'Failed to send message: ' + error.message);
-    });
+    const smsUrl = `sms:${mobileNumbers}?body=${encodeURIComponent(message)}`;
+
+    Linking.openURL(smsUrl)
+      .then(() => {
+        // Show emoji burst 🎉
+        setEmojiVisible(true);
+        setTimeout(() => setEmojiVisible(false), 1500);
+
+        // Clear all states
+        setBuyerId('');
+        setBuyerMobile('');
+        setBuyerList([]);
+        setMessage('');
+        setSelectedItem(null);
+        showToast('SMS opened. All data cleared.');
+      })
+      .catch(error => {
+        showToast('Failed to send message: ' + error.message);
+      });
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Buyer Information</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Buyer ID"
-        value={buyerId}
-        onChangeText={setBuyerId}
-        keyboardType="numeric"
-      />
+      <View style={styles.inputRow}>
+        <TextInput
+          style={styles.inputFlex}
+          placeholder="Buyer ID"
+          value={buyerId}
+          onChangeText={setBuyerId}
+          keyboardType="numeric"
+        />
 
-      <TouchableOpacity onPress={handleAddBuyer} style={styles.plusButton}>
-        <Text style={styles.plusText}>＋</Text>
-      </TouchableOpacity>
+        <Animatable.View animation="bounceIn" duration={800}>
+          <TouchableOpacity
+            onPress={handleAddBuyer}
+            style={styles.plusButtonSmall}>
+            <Text style={styles.plusText}>＋</Text>
+          </TouchableOpacity>
+        </Animatable.View>
+      </View>
 
       {buyerList.length > 0 && (
         <FlatList
@@ -188,67 +218,66 @@ ${userData.mobileno || userData.email}`;
       />
 
       {loading ? (
-        <ActivityIndicator size="large" color="blue" />
+        <ActivityIndicator size="large" color="#D5006D" />
       ) : (
-        <Button
-          title="Send SMS to Last Buyer"
+        <TouchableOpacity
           onPress={handleSubmitAndSendSMS}
-          color="#aa336a"
-        />
+          style={styles.sendButton}>
+          <Text style={styles.sendButtonText}>Send SMS to All Buyers</Text>
+        </TouchableOpacity>
+      )}
+
+      {toast ? (
+        <Animatable.View animation="slideInUp" style={styles.toast}>
+          <Text style={styles.toastText}>{toast}</Text>
+        </Animatable.View>
+      ) : null}
+
+      {emojiVisible && (
+        <Animatable.Text
+          animation="zoomIn"
+          iterationCount={1}
+          style={styles.emojiBurst}>
+          🎉🎊✨
+        </Animatable.Text>
       )}
     </View>
   );
 };
 
+const {width} = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
-    marginTop: 20,
+    flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    elevation: 3,
-    marginHorizontal: 16,
+    backgroundColor: '#f8f9fa',
   },
   heading: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#aa336a',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 12,
-    fontSize: 16,
-  },
-  plusButton: {
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#aa336a',
-    borderRadius: 50,
-    marginBottom: 12,
-    alignSelf: 'center',
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-  },
-  plusText: {
-    color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 10,
+    color: '#222',
+  },
 
+  plusText: {
+    color: '#fff',
+    fontSize: 30,
+    fontWeight: 'bold',
   },
   buyerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    padding: 12,
+    backgroundColor: '#fff',
+    marginBottom: 6,
+    borderRadius: 8,
+    borderColor: '#ccc',
+    borderWidth: 0.5,
   },
   buyerItem: {
     fontSize: 16,
+    color: '#333',
   },
   removeButton: {
     paddingHorizontal: 10,
@@ -258,20 +287,74 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   messageHeading: {
-    fontSize: 16,
     fontWeight: 'bold',
     marginTop: 20,
-    marginBottom: 8,
+    fontSize: 16,
   },
   messageInput: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 8,
-    fontSize: 16,
-    minHeight: 100,
+    padding: 12,
+    marginVertical: 10,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    height: 120,
     textAlignVertical: 'top',
-    marginBottom: 12,
+  },
+  sendButton: {
+    backgroundColor: '#D5006D',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+    elevation: 3,
+  },
+  sendButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  toast: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    backgroundColor: '#333',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  toastText: {color: '#fff', fontSize: 14},
+  emojiBurst: {
+    fontSize: 40,
+    position: 'absolute',
+    top: '40%',
+    alignSelf: 'center',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  inputFlex: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 12,
+    borderRadius: 10,
+    marginRight: 10,
+    backgroundColor: '#fff',
+  },
+  plusButtonSmall: {
+    backgroundColor: '#D5006D',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
 });
 

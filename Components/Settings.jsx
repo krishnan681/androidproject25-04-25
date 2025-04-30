@@ -20,11 +20,22 @@ const Settings = ({navigation}) => {
     ? userData.businessname || userData.person
     : 'Guest User';
 
-  // Define the mobile number of the admin
-  const adminMobileNumbers = ['6383965890', '9843657564', '8344508070']; // Change this to the actual admin number
+  // Define the mobile number of the admin and shop owner
+  const adminMobileNumbers = [
+    '6383965890',
+    '8344508070',
+    '9843657564',
+    '6383463820',
+  ]; // Change this to the actual admin number
+  const shopOwnerMobileNumber = ['8300705411', '6383463820']; // Shop owner's number
 
   // Check if the logged-in user is an admin
   const isAdmin = isLoggedIn && adminMobileNumbers.includes(userData.mobileno);
+
+  // Check if the logged-in user is the shop owner
+  // Check if the logged-in user is the shop owner
+const isShopOwner = isLoggedIn && shopOwnerMobileNumber.includes(userData.mobileno);
+
 
   // Function to show logout confirmation
   const confirmLogout = () => {
@@ -75,6 +86,18 @@ const Settings = ({navigation}) => {
           onPress={() => navigation.navigate('Icecream')}>
           <Icon name="ice-cream-outline" size={24} color="red" />
           <Text style={[styles.optionText, {color: 'red'}]}>Icecream</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Show Ice Cream Transaction Page for Shop Owner */}
+      {isShopOwner && (
+        <TouchableOpacity
+          style={styles.option}
+          onPress={() => navigation.navigate('IceCreamTransaction')}>
+          <Icon name="ice-cream-outline" size={24} color="blue" />
+          <Text style={[styles.optionText, {color: 'blue'}]}>
+            Ice-Cream Transactions
+          </Text>
         </TouchableOpacity>
       )}
 
@@ -169,8 +192,6 @@ const Settings = ({navigation}) => {
       </View>
 
       <Text style={styles.version}>Android version 1.0 </Text>
-
-      <Text></Text>
     </ScrollView>
   );
 };

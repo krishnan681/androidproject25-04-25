@@ -147,9 +147,12 @@ const Landingpage = () => {
 
   return (
     <ScrollView style={styles.container}>
+      <LinearGradient colors={["#FF69B4", "#FFFFFF"]}>
+
+      
       <View style={styles.carouselWrapper}>
         <Image
-          source={require('../src/assets/images/Clouds.png')}
+          // source={require('../src/assets/images/Clouds.png')}
           style={{width: '100%', height: 230, resizeMode: 'cover'}}
         />
         <View style={styles.overlayHeader}>
@@ -205,6 +208,7 @@ const Landingpage = () => {
           </View>
         </View>
       </View>
+      </LinearGradient>
 
       <View style={styles.bodyWrapper}>
         <View style={styles.gridWrapper}>
