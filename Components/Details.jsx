@@ -12,14 +12,14 @@ import {
 } from 'react-native';
 import {AuthContext, AuthProvider} from './AuthContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
+// import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 
 const Details = ({route, navigation}) => {
   // Get the selected item passed from navigation
   const {selectedItem} = route.params;
   const {user, userData} = useContext(AuthContext);
   
-  const [location, setLocation] = useState(null);
+  // const [location, setLocation] = useState(null);
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -45,48 +45,48 @@ const Details = ({route, navigation}) => {
     Linking.openURL(`sms:${number}`);
   };
 
-  useEffect(() => {
-    const fetchLocation = async () => {
-      const addressOptions = [
-        `${selectedItem.pincode}`,
-      ];
+  // useEffect(() => {
+  //   const fetchLocation = async () => {
+  //     const addressOptions = [
+  //       `${selectedItem.pincode}`,
+  //     ];
     
-      let locationFound = false;
-      for (const address of addressOptions) {
-        console.log("Trying address:", address);
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
-        const data = await response.json();
+  //     let locationFound = false;
+  //     for (const address of addressOptions) {
+  //       console.log("Trying address:", address);
+  //       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+  //       const data = await response.json();
     
-        console.log("API Response Data:", data);
+  //       console.log("API Response Data:", data);
     
-        if (data.length > 0) {
-          // Check for a city-level result, otherwise fallback to the first result
-          const cityResult = data.find(item => item.class === 'place' && item.type === 'city');
-          const loc = cityResult || data[0];  // Use city-level result if found, otherwise use the first result
+  //       if (data.length > 0) {
+  //         // Check for a city-level result, otherwise fallback to the first result
+  //         const cityResult = data.find(item => item.class === 'place' && item.type === 'city');
+  //         const loc = cityResult || data[0];  // Use city-level result if found, otherwise use the first result
     
-          setLocation({
-            latitude: parseFloat(loc.lat),
-            longitude: parseFloat(loc.lon),
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          });
-          locationFound = true;
-          break;
-        }
-      }
+  //         setLocation({
+  //           latitude: parseFloat(loc.lat),
+  //           longitude: parseFloat(loc.lon),
+  //           latitudeDelta: 0.01,
+  //           longitudeDelta: 0.01,
+  //         });
+  //         locationFound = true;
+  //         break;
+  //       }
+  //     }
     
-      if (!locationFound) {
-        Alert.alert("Could not find location from given address");
-      }
-    };
+  //     if (!locationFound) {
+  //       Alert.alert("Could not find location from given address");
+  //     }
+  //   };
     
     
     
 
-    if (selectedItem?.address && selectedItem?.city && selectedItem?.pincode) {
-      fetchLocation();
-    }
-  }, [selectedItem]);  // Trigger effect whenever selectedItem changes
+  //   if (selectedItem?.address && selectedItem?.city && selectedItem?.pincode) {
+  //     fetchLocation();
+  //   }
+  // }, [selectedItem]);  // Trigger effect whenever selectedItem changes
 
 
 
@@ -286,17 +286,17 @@ const Details = ({route, navigation}) => {
           </Text>
         </View>
 
-        {location && (
-        <MapView
-          provider={PROVIDER_DEFAULT}
-          style={styles.map}
-          region={location}
-          zoomEnabled={true}
-          scrollEnabled={true}
-        >
-          <Marker coordinate={location} title="Location" />
-        </MapView>
-      )}
+        {/* {location && (  */}
+        {/* // <MapView */}
+        {/* //   provider={PROVIDER_DEFAULT}
+        //   style={styles.map}
+        //   region={location}
+        //   zoomEnabled={true}
+        //   scrollEnabled={true} */}
+        {/* // > */}
+        {/* //   <Marker coordinate={location} title="Location" /> */}
+        {/* // </MapView> */}
+      {/* )} */}
       </View>
     </ScrollView>
   );

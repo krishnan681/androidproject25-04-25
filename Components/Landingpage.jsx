@@ -67,32 +67,32 @@ const categories = [
 const companyNames = [
   {
     name: 'Janatics',
-    logo: require('../src/assets/images/fabrication.jpg'),
+    logo: require('../src/assets/images/Janatics-logo.png'),
     color: '#f2f2f2',
   },
   {
     name: 'SunWater Supply',
-    logo: require('../src/assets/images/fabrication.jpg'),
+    logo: require('../src/assets/images/ajith-logo.png'),
     color: '#f2f2f2',
   },
   {
     name: 'Ajith Associates',
-    logo: require('../src/assets/images/fabrication.jpg'),
+    logo: require('../src/assets/images/ajith-logo.png'),
     color: '#f2f2f2',
   },
   {
     name: 'Fabtech',
-    logo: require('../src/assets/images/fabrication.jpg'),
+    logo: require('../src/assets/images/fabtech-logo.png'),
     color: '#f2f2f2',
   },
   {
     name: 'Raison Automation',
-    logo: require('../src/assets/images/fabrication.jpg'),
+    logo: require('../src/assets/images/Raison-logo.png'),
     color: '#f2f2f2',
   },
   {
     name: 'MKS Foods',
-    logo: require('../src/assets/images/fabrication.jpg'),
+    logo: require('../src/assets/images/mks-foods.png'),
     color: '#f2f2f2',
   },
 ];

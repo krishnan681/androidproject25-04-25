@@ -52,7 +52,10 @@ const Icecream = () => {
         if (jsonTransaction.success) {
           setShopData(jsonTransaction.data);
         } else {
-          Alert.alert('Error', jsonTransaction.message || 'Failed to fetch data');
+          Alert.alert(
+            'Error',
+            jsonTransaction.message || 'Failed to fetch data',
+          );
         }
 
         // Fetch data for show owner table
@@ -118,7 +121,8 @@ const Icecream = () => {
         {renderButtons()}
 
         {/* -----------------------------Transaction Table Section------------------------------------------------------------------------- */}
-        <TouchableOpacity onPress={() => setIsTransactionExpanded(!isTransactionExpanded)}>
+        <TouchableOpacity
+          onPress={() => setIsTransactionExpanded(!isTransactionExpanded)}>
           <Text style={[styles.listHeadLine, {paddingTop: 20}]}>
             Transaction Table
           </Text>
@@ -152,7 +156,7 @@ const Icecream = () => {
             ) : shopData.length > 0 ? (
               shopData.map((item, index) => (
                 <View key={item.id} style={styles.tableRow}>
-                  <Text style={styles.tableCell}>{index + 1}</Text>
+                  <Text style={styles.tableCell}>{item.id}</Text>
                   <Text style={styles.tableCell}>{item.shop_owner_name}</Text>
                   <Text style={styles.tableCell}>{item.customer_name}</Text>
                   <Text style={styles.tableCell}>{item.count}</Text>
@@ -185,8 +189,7 @@ const Icecream = () => {
           <>
             {/* Table Header */}
             <View style={[styles.tableRow, styles.tableHeader]}>
-              {/* <Text style={styles.tableCell}>ID</Text> */}
-              <Text style={styles.tableCell}>Owner id</Text>
+              <Text style={styles.tableCell}>Id</Text>
               <Text style={styles.tableCell}>Owner name</Text>
               <Text style={styles.tableCell}>total icecream</Text>
               <Text style={styles.tableCell}>sold icecream</Text>
@@ -204,8 +207,6 @@ const Icecream = () => {
             ) : ownerData.length > 0 ? (
               ownerData.map((item, index) => (
                 <View key={item.id} style={styles.tableRow}>
-                  {/* <Text style={styles.tableCell}>{index + 1}</Text> */}
-                  {/* <Text style={styles.tableCell}>{item.id}</Text> */}
                   <Text style={styles.tableCell}>{item.shop_owner_id}</Text>
                   <Text style={styles.tableCell}>{item.shop_owner_name}</Text>
                   <Text style={styles.tableCell}>{item.total_ice_cream}</Text>
